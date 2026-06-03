@@ -2,25 +2,19 @@
 
 declare(strict_types=1);
 
-// load functions
-$streakRoot = __DIR__;
+require_once "env.php";
+hydrateEnvFromServer();
 
-require_once $streakRoot . "/vendor/autoload.php";
 require_once "stats.php";
 require_once "card.php";
 require_once "cache.php";
 require_once "generator.php";
 
-// load .env
-$dotenv = \Dotenv\Dotenv::createImmutable($streakRoot);
-$dotenv->safeLoad();
-
-// if environment variables are not loaded, display error
-if (!isset($_ENV["TOKEN"])) {
-    $message = file_exists($streakRoot . "/.env")
-        ? "Missing token in config. Check Contributing.md for details."
-        : ".env was not found. Check Contributing.md for details.";
-    renderOutput($message, 500);
+if (!isset($_ENV["TOKEN"]) || $_ENV["TOKEN"] === "") {
+    renderOutput(
+        "Missing TOKEN environment variable. Add TOKEN in Vercel project settings and redeploy.",
+        500,
+    );
 }
 
 // set cache to refresh once per day (24 hours)
