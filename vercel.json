@@ -1,12 +1,12 @@
 {
-  "installCommand": "npm install && composer install --working-dir=api/streak --no-dev --optimize-autoloader",
   "functions": {
     "api/*.js": {
       "memory": 128,
       "maxDuration": 10
     },
-    "api/streak/**/*.php": {
-      "runtime": "vercel-php@0.9.0"
+    "api/streak/index.php": {
+      "runtime": "vercel-php@0.9.0",
+      "includeFiles": "api/streak/**"
     }
   },
   "rewrites": [

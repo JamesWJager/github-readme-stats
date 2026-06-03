@@ -2,13 +2,15 @@
 
 declare(strict_types=1);
 
-require_once "env.php";
+$dir = __DIR__;
+
+require_once $dir . "/env.php";
 hydrateEnvFromServer();
 
-require_once "stats.php";
-require_once "card.php";
-require_once "cache.php";
-require_once "generator.php";
+require_once $dir . "/stats.php";
+require_once $dir . "/card.php";
+require_once $dir . "/cache.php";
+require_once $dir . "/generator.php";
 
 if (!isset($_ENV["TOKEN"]) || $_ENV["TOKEN"] === "") {
     renderOutput(
