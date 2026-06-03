@@ -2,14 +2,10 @@
 .env
 node_modules
 *.lock
-!api/streak/composer.lock
 .idea/
 coverage
 benchmarks
 vercel_token
-
-# Streak stats (PHP) — vendor is built at deploy time
-api/streak/vendor/
 
 # IDE
 .vscode/*
