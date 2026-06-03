@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 // load functions
-$streakRoot = dirname(__DIR__, 2) . "/streak";
+$streakRoot = __DIR__;
 
 require_once $streakRoot . "/vendor/autoload.php";
 require_once "stats.php";

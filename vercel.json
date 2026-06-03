@@ -1,5 +1,5 @@
 {
-  "installCommand": "npm install && composer install --working-dir=streak --no-dev --optimize-autoloader",
+  "installCommand": "npm install && composer install --working-dir=api/streak --no-dev --optimize-autoloader",
   "functions": {
     "api/*.js": {
       "memory": 128,
