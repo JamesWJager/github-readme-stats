@@ -93,7 +93,9 @@ describe("Test fetchRepo", () => {
   it("should throw error if repository is private", async () => {
     mock.onPost("https://api.github.com/graphql").reply(200, {
       data: {
-        user: { repository: { ...data_repo, isPrivate: true } },
+        user: {
+          repository: { ...data_repo.repository, isPrivate: true },
+        },
         organization: null,
       },
     });
@@ -101,5 +103,63 @@ describe("Test fetchRepo", () => {
     await expect(fetchRepo("anuraghazra", "convoychat")).rejects.toThrow(
       "User Repository Not found",
     );
+  });
+
+  it("should fetch private repo when ALLOW_PRIVATE_REPOS is true", async () => {
+    process.env.ALLOW_PRIVATE_REPOS = "true";
+    mock.onPost("https://api.github.com/graphql").reply(200, {
+      data: {
+        user: {
+          repository: { ...data_repo.repository, isPrivate: true },
+        },
+        organization: null,
+      },
+    });
+
+    let repo = await fetchRepo("anuraghazra", "convoychat");
+
+    expect(repo).toStrictEqual({
+      ...data_repo.repository,
+      isPrivate: true,
+      starCount: data_repo.repository.stargazers.totalCount,
+    });
+
+    delete process.env.ALLOW_PRIVATE_REPOS;
+  });
+
+  it("should try PAT_2 when PAT_1 cannot access the repository", async () => {
+    process.env.PAT_1 = "token-1";
+    process.env.PAT_2 = "token-2";
+    process.env.ALLOW_PRIVATE_REPOS = "true";
+
+    mock
+      .onPost("https://api.github.com/graphql")
+      .replyOnce(200, {
+        data: {
+          user: { repository: null },
+          organization: null,
+        },
+      })
+      .onPost("https://api.github.com/graphql")
+      .replyOnce(200, {
+        data: {
+          user: {
+            repository: { ...data_repo.repository, isPrivate: true },
+          },
+          organization: null,
+        },
+      });
+
+    let repo = await fetchRepo("EcoMileSmartDrive", "EcoMileMobile");
+
+    expect(repo).toStrictEqual({
+      ...data_repo.repository,
+      isPrivate: true,
+      starCount: data_repo.repository.stargazers.totalCount,
+    });
+
+    delete process.env.PAT_1;
+    delete process.env.PAT_2;
+    delete process.env.ALLOW_PRIVATE_REPOS;
   });
 });

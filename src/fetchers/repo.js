@@ -55,6 +55,54 @@ const fetcher = (variables, token) => {
 
 const urlExample = "/api/pin?username=USERNAME&amp;repo=REPO_NAME";
 
+const privateReposAllowed = () => process.env.ALLOW_PRIVATE_REPOS === "true";
+
+const getPatCount = () =>
+  Object.keys(process.env).filter((key) => /^PAT_\d+$/.test(key)).length;
+
+/**
+ * @param {any} data GraphQL response data.
+ * @returns {{ repository: any; ownerType: "user" | "org" } | null}
+ */
+const parseRepoFromData = (data) => {
+  if (!data?.user && !data?.organization) {
+    return null;
+  }
+
+  const isUser = data.organization === null && data.user;
+  const isOrg = data.user === null && data.organization;
+
+  if (isUser && data.user.repository) {
+    return { repository: data.user.repository, ownerType: "user" };
+  }
+
+  if (isOrg && data.organization.repository) {
+    return { repository: data.organization.repository, ownerType: "org" };
+  }
+
+  return null;
+};
+
+/**
+ * @param {any} data GraphQL response data.
+ * @returns {"user" | "org" | null}
+ */
+const getOwnerType = (data) => {
+  if (!data?.user && !data?.organization) {
+    return null;
+  }
+
+  if (data.organization === null && data.user) {
+    return "user";
+  }
+
+  if (data.user === null && data.organization) {
+    return "org";
+  }
+
+  return null;
+};
+
 /**
  * @typedef {import("./types").RepositoryData} RepositoryData Repository data.
  */
@@ -77,41 +125,55 @@ const fetchRepo = async (username, reponame) => {
     throw new MissingParamError(["repo"], urlExample);
   }
 
-  let res = await retryer(fetcher, { login: username, repo: reponame });
+  const patCount = getPatCount();
+  const attempts = patCount || 1;
+  let accountExists = false;
+  /** @type {"user" | "org" | null} */
+  let lastOwnerType = null;
 
-  const data = res.data.data;
+  for (let i = 0; i < attempts; i++) {
+    if (patCount && !process.env[`PAT_${i + 1}`]) {
+      continue;
+    }
 
-  if (!data.user && !data.organization) {
+    const res = await retryer(fetcher, { login: username, repo: reponame }, i);
+    const data = res.data?.data;
+
+    if (getOwnerType(data)) {
+      accountExists = true;
+      lastOwnerType = getOwnerType(data);
+    }
+
+    const parsed = parseRepoFromData(data);
+    if (!parsed) {
+      continue;
+    }
+
+    const { repository, ownerType } = parsed;
+
+    if (!privateReposAllowed() && repository.isPrivate) {
+      throw new Error(
+        ownerType === "user"
+          ? "User Repository Not found"
+          : "Organization Repository Not found",
+      );
+    }
+
+    return {
+      ...repository,
+      starCount: repository.stargazers.totalCount,
+    };
+  }
+
+  if (!accountExists) {
     throw new Error("Not found");
   }
 
-  const isUser = data.organization === null && data.user;
-  const isOrg = data.user === null && data.organization;
-
-  if (isUser) {
-    if (!data.user.repository || data.user.repository.isPrivate) {
-      throw new Error("User Repository Not found");
-    }
-    return {
-      ...data.user.repository,
-      starCount: data.user.repository.stargazers.totalCount,
-    };
-  }
-
-  if (isOrg) {
-    if (
-      !data.organization.repository ||
-      data.organization.repository.isPrivate
-    ) {
-      throw new Error("Organization Repository Not found");
-    }
-    return {
-      ...data.organization.repository,
-      starCount: data.organization.repository.stargazers.totalCount,
-    };
-  }
-
-  throw new Error("Unexpected behavior");
+  throw new Error(
+    lastOwnerType === "org"
+      ? "Organization Repository Not found"
+      : "User Repository Not found",
+  );
 };
 
 export { fetchRepo };

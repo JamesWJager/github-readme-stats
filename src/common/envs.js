@@ -1,15 +1,21 @@
 // @ts-check
 
+const parseCommaSeparatedEnv = (value) =>
+  value
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+
 const whitelist = process.env.WHITELIST
-  ? process.env.WHITELIST.split(",")
+  ? parseCommaSeparatedEnv(process.env.WHITELIST)
   : undefined;
 
 const gistWhitelist = process.env.GIST_WHITELIST
-  ? process.env.GIST_WHITELIST.split(",")
+  ? parseCommaSeparatedEnv(process.env.GIST_WHITELIST)
   : undefined;
 
 const excludeRepositories = process.env.EXCLUDE_REPO
-  ? process.env.EXCLUDE_REPO.split(",")
+  ? parseCommaSeparatedEnv(process.env.EXCLUDE_REPO)
   : [];
 
 export { whitelist, gistWhitelist, excludeRepositories };
