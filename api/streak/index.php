@@ -3,19 +3,21 @@
 declare(strict_types=1);
 
 // load functions
-require_once dirname(__DIR__, 1) . "/vendor/autoload.php";
+$streakRoot = dirname(__DIR__, 2) . "/streak";
+
+require_once $streakRoot . "/vendor/autoload.php";
 require_once "stats.php";
 require_once "card.php";
 require_once "cache.php";
 require_once "generator.php";
 
 // load .env
-$dotenv = \Dotenv\Dotenv::createImmutable(dirname(__DIR__, 1));
+$dotenv = \Dotenv\Dotenv::createImmutable($streakRoot);
 $dotenv->safeLoad();
 
 // if environment variables are not loaded, display error
 if (!isset($_ENV["TOKEN"])) {
-    $message = file_exists(dirname(__DIR__, 1) . "/.env")
+    $message = file_exists($streakRoot . "/.env")
         ? "Missing token in config. Check Contributing.md for details."
         : ".env was not found. Check Contributing.md for details.";
     renderOutput($message, 500);

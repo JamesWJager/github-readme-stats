@@ -5,13 +5,13 @@
       "memory": 128,
       "maxDuration": 10
     },
-    "streak/api/**/*.php": {
+    "api/streak/**/*.php": {
       "runtime": "vercel-php@0.9.0"
     }
   },
   "rewrites": [
-    { "source": "/streak", "destination": "/streak/api/index.php" },
-    { "source": "/streak/", "destination": "/streak/api/index.php" }
+    { "source": "/streak", "destination": "/api/streak/index.php" },
+    { "source": "/streak/", "destination": "/api/streak/index.php" }
   ],
   "redirects": [
     {
