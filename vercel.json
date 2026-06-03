@@ -1,14 +1,22 @@
 {
+  "installCommand": "npm install && composer install --working-dir=streak --no-dev --optimize-autoloader",
   "functions": {
     "api/*.js": {
       "memory": 128,
       "maxDuration": 10
+    },
+    "streak/api/**/*.php": {
+      "runtime": "vercel-php@0.9.0"
     }
   },
+  "rewrites": [
+    { "source": "/streak", "destination": "/streak/api/index.php" },
+    { "source": "/streak/", "destination": "/streak/api/index.php" }
+  ],
   "redirects": [
     {
       "source": "/",
-      "destination": "https://github.com/anuraghazra/github-readme-stats"
+      "destination": "https://github.com/JamesWJager/github-readme-stats"
     }
   ]
 }

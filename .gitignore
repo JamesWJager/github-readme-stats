@@ -2,15 +2,17 @@
 .env
 node_modules
 *.lock
+!streak/composer.lock
 .idea/
 coverage
 benchmarks
 vercel_token
+
+# Streak stats (PHP sub-app)
+streak/vendor/
 
 # IDE
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
 *.code-workspace
-
-.vercel
