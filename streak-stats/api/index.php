@@ -2,21 +2,23 @@
 
 declare(strict_types=1);
 
-$dir = __DIR__;
+// load functions
+require_once dirname(__DIR__, 1) . "/vendor/autoload.php";
+require_once "stats.php";
+require_once "card.php";
+require_once "cache.php";
+require_once "generator.php";
 
-require_once $dir . "/env.php";
-hydrateEnvFromServer();
+// load .env
+$dotenv = \Dotenv\Dotenv::createImmutable(dirname(__DIR__, 1));
+$dotenv->safeLoad();
 
-require_once $dir . "/stats.php";
-require_once $dir . "/card.php";
-require_once $dir . "/cache.php";
-require_once $dir . "/generator.php";
-
-if (!isset($_ENV["TOKEN"]) || $_ENV["TOKEN"] === "") {
-    renderOutput(
-        "Missing TOKEN environment variable. Add TOKEN in Vercel project settings and redeploy.",
-        500,
-    );
+// if environment variables are not loaded, display error
+if (!isset($_ENV["TOKEN"])) {
+    $message = file_exists(dirname(__DIR__, 1) . "/.env")
+        ? "Missing token in config. Check Contributing.md for details."
+        : ".env was not found. Check Contributing.md for details.";
+    renderOutput($message, 500);
 }
 
 // set cache to refresh once per day (24 hours)

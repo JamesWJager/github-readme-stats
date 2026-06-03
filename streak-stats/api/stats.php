@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . "/whitelist.php";
+require_once "whitelist.php";
 
 /**
  * Build a GraphQL query for a contribution graph

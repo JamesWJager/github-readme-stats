@@ -2,10 +2,14 @@
 .env
 node_modules
 *.lock
+!streak-stats/composer.lock
 .idea/
 coverage
 benchmarks
 vercel_token
+
+# Standalone streak-stats Vercel app (separate project)
+streak-stats/vendor/
 
 # IDE
 .vscode/*
